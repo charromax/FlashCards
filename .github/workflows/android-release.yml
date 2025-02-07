@@ -22,14 +22,18 @@ jobs:
           java-version: '17'
 
       - name: Auto-increment versionCode
+        env:
+          GH_PAT: ${{ secrets.TOKEN }}
         run: |
           versionCode=$(grep versionCode versions.properties | cut -d'=' -f2)
           newVersionCode=$((versionCode + 1))
           sed -i "s/versionCode=$versionCode/versionCode=$newVersionCode/" versions.properties
+
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
+          git remote set-url origin https://x-access-token:$GH_PAT@github.com/charromax/FlashCards.git
           git commit -am "🔄 Bump versionCode to $newVersionCode"
-          git push
+          git push origin release
 
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > keystore.jks
