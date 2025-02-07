@@ -7,17 +7,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,33 +40,35 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.charr0max.flashcards.R
 import com.charr0max.flashcards.presentation.ui.util.AppColors
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_JR
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_SENIOR
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_SSR
+import com.charr0max.flashcards.presentation.ui.util.LinkParser
 import com.charr0max.flashcards.presentation.ui.util.PermissionHelper
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +76,7 @@ fun QuestionScreen(
     viewModel: QuestionViewModel = hiltViewModel(),
     navController: NavController,
     difficulty: String,
+    language: String,
     topics: List<String>,
     activity: ComponentActivity
 ) {
@@ -78,7 +88,7 @@ fun QuestionScreen(
         }
     }
 
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val backgroundColor = when (state.difficulty) {
         DIFFICULTY_JR -> AppColors.GreenLight
@@ -88,33 +98,51 @@ fun QuestionScreen(
     }
 
     var userAnswer by remember { mutableStateOf(TextFieldValue(state.userAnswer)) }
-
-    LaunchedEffect(state.userAnswer) {
-        userAnswer = TextFieldValue(state.userAnswer)
-    }
+    var geminiAnswer by remember { mutableStateOf(AnnotatedString("")) }
+    val scrollState = rememberScrollState()
+    val uriHandler = LocalUriHandler.current
+    var isUserTyping by remember { mutableStateOf(true) }
 
     LaunchedEffect(state.geminiAnswer) {
         if (state.geminiAnswer.isNotEmpty()) {
-            userAnswer = TextFieldValue(state.geminiAnswer)
-        }
-    }
+            val rawText = state.geminiAnswer
+            val links = LinkParser.extractLinks(rawText)
+            val cleanText = LinkParser.cleanMarkdownLinks(rawText)
 
-    LaunchedEffect(state.listeningState) {
-        if (state.listeningState == ListeningState.Stopped) {
-            delay(5000)
-            viewModel.sendAnswerToGemini()
+            val annotatedString = AnnotatedString.Builder(cleanText)
+            links.forEach { link ->
+                val startIndex = cleanText.indexOf(link)
+                if (startIndex != -1) {
+                    annotatedString.addStyle(
+                        style = SpanStyle(
+                            color = Color.Blue,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        start = startIndex,
+                        end = startIndex + link.length
+                    )
+                    annotatedString.addStringAnnotation(
+                        tag = "URL",
+                        annotation = link,
+                        start = startIndex,
+                        end = startIndex + link.length
+                    )
+                }
+            }
+            geminiAnswer = annotatedString.toAnnotatedString()
+            isUserTyping = false
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.initialize(difficulty, topics)
+        viewModel.initialize(difficulty, topics, language)
         viewModel.loadQuestion()
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pregunta nivel ${state.difficulty}") },
+                title = { Text("Pregunta sobre ${state.language}") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -137,6 +165,7 @@ fun QuestionScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             if (state.isLoading) CircularProgressIndicator() else {
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,17 +196,45 @@ fun QuestionScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = state.question, style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = userAnswer,
-                        onValueChange = { userAnswer = it },
-                        label = { Text("Tu respuesta") },
+                    Box(
                         modifier = Modifier
+                            .heightIn(max = 300.dp)
                             .fillMaxWidth()
-                            .weight(1f),
-                        singleLine = false
-                    )
+                            .verticalScroll(scrollState)
+                    ) {
+                        Text(
+                            text = state.question,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (isUserTyping) {
+                        OutlinedTextField(
+                            value = userAnswer.text,
+                            onValueChange = {
+                                userAnswer = TextFieldValue(it)
+                                isUserTyping =
+                                    true  // 🔹 Usuario está escribiendo, deshabilitamos links
+                            },
+                            label = { Text("Tu respuesta") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            singleLine = false
+                        )
+                    } else {
+                        ClickableText(
+                            text = geminiAnswer,
+                            onClick = { offset ->
+                                geminiAnswer.getStringAnnotations("URL", offset, offset)
+                                    .firstOrNull()?.let { annotation ->
+                                        uriHandler.openUri(annotation.item)
+                                    }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -185,37 +242,75 @@ fun QuestionScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(onClick = { viewModel.loadQuestion() }) {
+                    Button(onClick = {
+                        isUserTyping = true
+                        userAnswer = TextFieldValue("")
+                        geminiAnswer = AnnotatedString("")
+                        viewModel.loadQuestion()
+                    }) {
                         Text("Siguiente Pregunta")
                     }
 
-                    FloatingActionButton(
-                        onClick = {
-                            if (PermissionHelper.hasAudioPermission(activity)) {
-                                viewModel.toggleListening()
-                            } else {
-                                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            }
-                        },
-                        modifier = Modifier.size(56.dp),
-                        containerColor = if (state.listeningState == ListeningState.Listening) {
-                            Color.Red
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
-                    ) {
-                        Icon(
-                            imageVector = if (state.listeningState == ListeningState.Listening) {
-                                Icons.Filled.Clear
-                            } else {
-                                ImageVector.vectorResource(R.drawable.microphone)
+                    Row {
+                        ActionButton(
+                            onClick = {
+                                if (PermissionHelper.hasAudioPermission(activity)) {
+                                    viewModel.toggleListening()
+                                } else {
+                                    requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
                             },
-                            tint = Color.White,
-                            contentDescription = "Iniciar reconocimiento de voz"
-                        )
+                            containerColor = if (state.listeningState == ListeningState.Listening) {
+                                Color.Red
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                            enabled = isUserTyping
+                        ) {
+                            Icon(
+                                imageVector = if (state.listeningState == ListeningState.Listening) {
+                                    Icons.Filled.Clear
+                                } else {
+                                    ImageVector.vectorResource(R.drawable.microphone)
+                                },
+                                tint = Color.White,
+                                contentDescription = "Iniciar reconocimiento de voz"
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        ActionButton(
+                            onClick = viewModel::sendAnswerToGemini,
+                            enabled = isUserTyping && userAnswer.text.isNotEmpty()
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                tint = Color.White,
+                                contentDescription = "Enviar respuesta"
+                            )
+                        }
                     }
+
                 }
             }
         }
     }
+}
+
+
+@Composable
+fun ActionButton(
+    modifier: Modifier = Modifier.size(56.dp),
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    icon: @Composable () -> Unit,
+) {
+    FloatingActionButton(
+        onClick = {
+            if (enabled) onClick()
+        },
+        containerColor = if (enabled) containerColor else Color.LightGray,
+        modifier = modifier,
+        content = icon,
+    )
 }

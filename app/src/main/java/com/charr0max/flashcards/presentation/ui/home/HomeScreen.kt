@@ -36,12 +36,20 @@ import com.charr0max.flashcards.presentation.ui.util.AppColors
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_JR
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_SENIOR
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_SSR
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_CPP
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_JAVA
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_JAVASCRIPT
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_KOTLIN
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_PYTHON
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_SWIFT
 import com.charr0max.flashcards.presentation.ui.util.Constants.QUESTION_ROUTE
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_COROUTINES
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_FLOWS
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_JETPACK_COMPOSE
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_NETWORKING
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_PERFORMANCE
+import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_SWIFTUI
+import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_TESTING
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -59,7 +67,18 @@ fun HomeScreen(navController: NavController) {
         TOPIC_PERFORMANCE,
         TOPIC_COROUTINES,
         TOPIC_NETWORKING,
-        TOPIC_FLOWS
+        TOPIC_FLOWS,
+        TOPIC_SWIFTUI,
+        TOPIC_TESTING
+    )
+
+    val languages = listOf(
+        LANGUAGE_KOTLIN,
+        LANGUAGE_JAVA,
+        LANGUAGE_JAVASCRIPT,
+        LANGUAGE_PYTHON,
+        LANGUAGE_SWIFT,
+        LANGUAGE_CPP
     )
     val selectedTopics = remember {
         mutableStateMapOf<String, Boolean>().apply {
@@ -81,14 +100,16 @@ fun HomeScreen(navController: NavController) {
         HomeScreenContent(
             pv,
             difficulties,
+            languages,
             topics,
             selectedTopics,
             snackbarHostState
-        ) { selectedTopicsList, selectedDifficulty ->
+        ) { selectedTopicsList, selectedDifficulty, selectedLanguage ->
             navController.navigate(
                 QUESTION_ROUTE
                     .replace("{difficulty}", selectedDifficulty)
                     .replace("{topics}", selectedTopicsList)
+                    .replace("{language}", selectedLanguage)
             )
         }
     }
@@ -99,12 +120,14 @@ fun HomeScreen(navController: NavController) {
 private fun HomeScreenContent(
     pv: PaddingValues,
     difficulties: List<Pair<String, Pair<Color, Color>>>,
+    languages: List<String>,
     topics: List<String>,
     selectedTopics: SnapshotStateMap<String, Boolean>,
     snackbarHostState: SnackbarHostState,
-    navigateToQuestions: (selectedTopicList: String, selectedDifficulty: String) -> Unit
+    navigateToQuestions: (selectedTopicList: String, selectedDifficulty: String, selectedLanguage: String) -> Unit
 ) {
-    var selectedDifficulty by remember { mutableStateOf("Jr") }
+    var selectedDifficulty by remember { mutableStateOf(difficulties.first().first) }
+    var selectedLanguage by remember { mutableStateOf(languages.first()) }
     val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
@@ -137,6 +160,22 @@ private fun HomeScreenContent(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Selecciona el lenguaje", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                languages.forEach { language ->
+                    val isSelected = selectedLanguage == language
+                    FilterChip(
+                        label = language,
+                        selected = isSelected,
+                        onClick = { selectedLanguage = language }
+                    )
+                }
+            }
 
             Text("Selecciona los temas", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(8.dp))
@@ -160,7 +199,7 @@ private fun HomeScreenContent(
                 if (selectedTopicsList.isEmpty()) {
                     coroutineScope.launch { snackbarHostState.showSnackbar("Debes seleccionar al menos un tema.") }
                 } else {
-                    navigateToQuestions(selectedTopicsList, selectedDifficulty)
+                    navigateToQuestions(selectedTopicsList, selectedDifficulty, selectedLanguage)
                 }
             }) {
             Text("Start")

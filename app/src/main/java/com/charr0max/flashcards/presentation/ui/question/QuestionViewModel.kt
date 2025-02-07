@@ -3,11 +3,13 @@ package com.charr0max.flashcards.presentation.ui.question
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.charr0max.flashcards.data.speech.SpeechRecognizerHelper
+import com.charr0max.flashcards.domain.model.Result
 import com.charr0max.flashcards.domain.usecase.GetQuestionFromGeminiUseCase
 import com.charr0max.flashcards.domain.usecase.SendAnswerToGeminiUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,47 +34,61 @@ class QuestionViewModel @Inject constructor(
         }
     }
 
-    fun initialize(difficulty: String, topics: List<String>) {
-        _state.value = QuestionState(difficulty = difficulty, topics = topics)
+    fun initialize(difficulty: String, topics: List<String>, language: String) {
+        _state.value = QuestionState(difficulty = difficulty, topics = topics, language = language)
     }
 
-    fun loadQuestion() {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    geminiAnswer = "",
-                    userAnswer = "",
-                    listeningState = ListeningState.Idle
-                )
-            }
-            _state.update {
-                val currentTopic = it.topics.random()
-                it.copy(
-                    question = getQuestionFromGeminiUseCase(
-                        topic = currentTopic,
-                        difficulty = it.difficulty
-                    ),
-                    currentTopic = currentTopic,
-                    isLoading = false
-                )
+    fun loadQuestion() = viewModelScope.launch {
+        val currentTopic = state.value.topics.random()
+        getQuestionFromGeminiUseCase(
+            topic = currentTopic,
+            difficulty = state.value.difficulty,
+            language = state.value.language
+        ).collectLatest { result ->
+            when (result) {
+                is Result.Error -> _state.update { it.copy(isLoading = false) }
+                Result.Loading -> _state.update {
+                    it.copy(
+                        isLoading = true,
+                        geminiAnswer = "",
+                        userAnswer = "",
+                        listeningState = ListeningState.Idle
+                    )
+                }
+
+                is Result.Success -> {
+                    _state.update {
+                        it.copy(
+                            question = result.data ?: "No se pudo obtener la pregunta",
+                            isLoading = false,
+                            currentTopic = currentTopic
+                        )
+                    }
+                }
             }
         }
     }
 
     fun sendAnswerToGemini() = viewModelScope.launch {
-        _state.update { it.copy(isLoading = true) }
-        _state.update {
-            it.copy(
-                geminiAnswer = sendAnswerToGeminiUseCase(
-                    topic = it.currentTopic,
-                    difficulty = it.difficulty,
-                    question = it.question,
-                    answer = it.userAnswer
-                ),
-                isLoading = false,
-                listeningState = ListeningState.Idle,
-            )
+        sendAnswerToGeminiUseCase(
+            topic = state.value.currentTopic,
+            difficulty = state.value.difficulty,
+            question = state.value.question,
+            answer = state.value.userAnswer
+        ).collectLatest { result ->
+            when (result) {
+                is Result.Error -> _state.update { it.copy(isLoading = false) }
+                Result.Loading -> _state.update { it.copy(isLoading = true) }
+                is Result.Success -> {
+                    _state.update {
+                        it.copy(
+                            geminiAnswer = result.data ?: "No se pudo obtener la respuesta",
+                            isLoading = false,
+                            listeningState = ListeningState.Idle,
+                        )
+                    }
+                }
+            }
         }
     }
 

@@ -10,6 +10,8 @@ import com.charr0max.flashcards.presentation.ui.question.QuestionScreen
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_ARG
 import com.charr0max.flashcards.presentation.ui.util.Constants.DIFFICULTY_JR
 import com.charr0max.flashcards.presentation.ui.util.Constants.HOME_ROUTE
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_ARG
+import com.charr0max.flashcards.presentation.ui.util.Constants.LANGUAGE_KOTLIN
 import com.charr0max.flashcards.presentation.ui.util.Constants.QUESTION_ROUTE
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPICS_ARG
 import androidx.navigation.compose.NavHost as ComposeNavHost
@@ -40,10 +42,12 @@ fun FlashCardsNavHost(activity: ComponentActivity) {
 
         composable(QuestionNavigation.route) { backStackEntry ->
             val difficulty = backStackEntry.arguments?.getString(DIFFICULTY_ARG) ?: DIFFICULTY_JR
+            val language = backStackEntry.arguments?.getString(LANGUAGE_ARG) ?: LANGUAGE_KOTLIN
             val topics = backStackEntry.arguments?.getString(TOPICS_ARG)?.split(",") ?: emptyList()
             QuestionScreen(
                 navController = navController,
                 difficulty = difficulty,
+                language = language,
                 topics = topics,
                 activity = activity
             )
