@@ -52,7 +52,6 @@ import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_SWIFTUI
 import com.charr0max.flashcards.presentation.ui.util.Constants.TOPIC_TESTING
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(navController: NavController) {
 

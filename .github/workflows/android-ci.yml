@@ -31,8 +31,11 @@ jobs:
       - name: Inject Gemini API Key
         run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> secrets.properties
 
-      - name: Build and Test
-        run: ./gradlew assembleDebug test
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Build Artifact
+        run: ./gradlew assembleDebug
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
