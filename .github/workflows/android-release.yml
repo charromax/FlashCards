@@ -30,15 +30,19 @@ jobs:
           versionMajor=$(grep versionMajor versions.properties | cut -d'=' -f2)
           versionMinor=$(grep versionMinor versions.properties | cut -d'=' -f2)
           versionPatch=$(grep versionPatch versions.properties | cut -d'=' -f2)
-
+          
           newVersionCode=$((versionCode + 1))
           newVersionPatch=$((versionPatch + 1))
-
+          
           # 🚀 Incrementar versionCode y versionPatch en versions.properties
           sed -i "s/versionCode=[0-9]\+/versionCode=$newVersionCode/" versions.properties
           sed -i "s/versionPatch=[0-9]\+/versionPatch=$newVersionPatch/" versions.properties
 
-          newVersionTag="v$versionMajor.$versionMinor.$newVersionPatch"
+          # 🚀 Leer nuevamente versionPatch después de actualizar el archivo
+          versionPatch=$(grep versionPatch versions.properties | cut -d'=' -f2)
+          
+          # 🔹 Generar el tag correctamente con el valor actualizado de versionPatch
+          newVersionTag="v$versionMajor.$versionMinor.$versionPatch"
 
           # 🔎 Verificación para asegurarse de que newVersionTag no esté vacío
           if [[ -z "$newVersionTag" ]]; then
