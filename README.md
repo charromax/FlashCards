@@ -7,7 +7,7 @@ FlashCards es una aplicación de entrevistas técnicas interactiva que utiliza *
 - **Selección de dificultad y temas**: El usuario puede elegir entre niveles de dificultad (`Jr`, `Ssr`, `Senior`) y temas (`Jetpack Compose`, `Coroutines`, `Networking`, `Performance`, `Flows`).
 - **Generación de preguntas**: Utiliza la API de **Google Gemini** para generar preguntas basadas en la dificultad y el tema elegido.
 - **Respuesta por voz**: Implementación de **Speech-to-Text** con `SpeechRecognizer`.
-- **Corrección automática**: La respuesta del usuario se envía a **Gemini** para recibir feedback.
+- **Corrección automática**: La respuesta del usuario se envía a **Gemini** para recibir feedback. Gemini puede devolver links relevantes si lo considera necesario, que son clickeables.
 - **UI intuitiva**: Implementado en **Jetpack Compose** con **Hilt para DI** y **Retrofit para llamadas a API**.
 
 ## 📁 Estructura del Proyecto
@@ -64,4 +64,15 @@ Este proyecto está bajo la licencia **MIT**.
 ### ⭐ ¡Contribuye!
 
 Si quieres mejorar la app, siéntete libre de hacer un fork y enviar un PR. 🚀
+
+**ScreenShots**
+
+![image](https://github.com/user-attachments/assets/50907783-bdf6-437d-a64a-9f0066a9f199)
+
+![image](https://github.com/user-attachments/assets/a8e5a04b-e748-4d23-a668-d3e39aabe24e)
+
+![image](https://github.com/user-attachments/assets/6518e215-9e9f-4603-bfcf-82eaa028a2eb)
+
+
+
 
