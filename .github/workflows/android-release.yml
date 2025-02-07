@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    if: "!startsWith(github.ref, 'refs/tags/')"
     name: Build & Sign AAB
     runs-on: ubuntu-latest
 
@@ -22,8 +23,6 @@ jobs:
           java-version: '17'
 
       - name: Auto-increment versionCode
-        env:
-          GH_PAT: ${{ secrets.TOKEN }}
         run: |
           versionCode=$(grep versionCode versions.properties | cut -d'=' -f2)
           newVersionCode=$((versionCode + 1))
@@ -31,7 +30,7 @@ jobs:
 
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git remote set-url origin https://x-access-token:$GH_PAT@github.com/charromax/FlashCards.git
+          git remote set-url origin https://x-access-token:${{ secrets.TOKEN }}@github.com/charromax/FlashCards.git
           git commit -am "🔄 Bump versionCode to $newVersionCode"
           git push origin release
 
