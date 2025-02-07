@@ -67,10 +67,11 @@ Si quieres mejorar la app, siéntete libre de hacer un fork y enviar un PR. 🚀
 
 **ScreenShots**
 
-![image](https://github.com/user-attachments/assets/50907783-bdf6-437d-a64a-9f0066a9f199)
-![image](https://github.com/user-attachments/assets/a8e5a04b-e748-4d23-a668-d3e39aabe24e)
-![image](https://github.com/user-attachments/assets/6518e215-9e9f-4603-bfcf-82eaa028a2eb)
-
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/50907783-bdf6-437d-a64a-9f0066a9f199" width="30%" />
+    <img src="https://github.com/user-attachments/assets/a8e5a04b-e748-4d23-a668-d3e39aabe24e" width="30%" />
+    <img src="https://github.com/user-attachments/assets/6518e215-9e9f-4603-bfcf-82eaa028a2eb" width="30%" />
+</div>
 
 
 
