@@ -9,6 +9,11 @@ plugins {
     id("kotlinx-serialization")
 }
 
+// Cargar el archivo versions.properties
+val versionProperties = Properties().apply {
+    load(rootProject.file("versions.properties").inputStream())
+}
+
 android {
     namespace = "com.charr0max.flashcards"
     compileSdk = 35
@@ -17,8 +22,9 @@ android {
         applicationId = "com.charr0max.flashcards"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = versionProperties["versionCode"].toString().toInt()
+        versionName =
+            "${versionProperties["versionMajor"]}.${versionProperties["versionMinor"]}.${versionProperties["versionPatch"]}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
