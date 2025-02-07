@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Auto-increment versionCode
+      - name: Auto-increment versionCode & versionPatch
         env:
           GH_PAT: ${{ secrets.TOKEN }}
         run: |
@@ -32,16 +32,27 @@ jobs:
           versionPatch=$(grep versionPatch versions.properties | cut -d'=' -f2)
 
           newVersionCode=$((versionCode + 1))
-          newVersionTag="v$versionMajor.$versionMinor.$versionPatch"
+          newVersionPatch=$((versionPatch + 1))
 
-          sed -i "s/versionCode=$versionCode/versionCode=$newVersionCode/" versions.properties
+          # 🚀 Incrementar versionCode y versionPatch en versions.properties
+          sed -i "s/versionCode=[0-9]\+/versionCode=$newVersionCode/" versions.properties
+          sed -i "s/versionPatch=[0-9]\+/versionPatch=$newVersionPatch/" versions.properties
+
+          newVersionTag="v$versionMajor.$versionMinor.$newVersionPatch"
+
+          # 🔎 Verificación para asegurarse de que newVersionTag no esté vacío
+          if [[ -z "$newVersionTag" ]]; then
+            echo "❌ Error: No se generó un tag válido"
+            exit 1
+          fi
 
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
           git remote set-url origin https://x-access-token:${{ secrets.TOKEN }}@github.com/charromax/FlashCards.git
-          git commit -am "🔄 Bump versionCode to $newVersionCode"
 
-          # 🚀 Nueva lógica para crear y subir el tag correctamente
+          git commit -am "🔄 Bump versionCode to $newVersionCode & versionPatch to $newVersionPatch"
+
+          # 🚀 Crear y subir el tag correctamente
           git tag -fa "$newVersionTag" -m "🚀 Release $newVersionTag"
           git push origin "$newVersionTag"
 
