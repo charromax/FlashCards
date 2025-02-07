@@ -23,16 +23,38 @@ jobs:
           java-version: '17'
 
       - name: Auto-increment versionCode
+        env:
+          GH_PAT: ${{ secrets.TOKEN }}
         run: |
           versionCode=$(grep versionCode versions.properties | cut -d'=' -f2)
+          versionMajor=$(grep versionMajor versions.properties | cut -d'=' -f2)
+          versionMinor=$(grep versionMinor versions.properties | cut -d'=' -f2)
+          versionPatch=$(grep versionPatch versions.properties | cut -d'=' -f2)
+
           newVersionCode=$((versionCode + 1))
+          newVersionTag="v$versionMajor.$versionMinor.$versionPatch"
+
           sed -i "s/versionCode=$versionCode/versionCode=$newVersionCode/" versions.properties
 
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
           git remote set-url origin https://x-access-token:${{ secrets.TOKEN }}@github.com/charromax/FlashCards.git
           git commit -am "🔄 Bump versionCode to $newVersionCode"
-          git push origin release
+
+          # 🚀 Nueva lógica para crear y subir el tag correctamente
+          git tag -fa "$newVersionTag" -m "🚀 Release $newVersionTag"
+          git push origin "$newVersionTag"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+         tag_name: "v${{ env.versionMajor }}.${{ env.versionMinor }}.${{ env.versionPatch }}"
+         name: "Release v${{ env.versionMajor }}.${{ env.versionMinor }}.${{ env.versionPatch }}"
+         draft: false
+         prerelease: false
+         files: app/build/outputs/bundle/release/app-release.aab
+        env:
+           GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > keystore.jks
