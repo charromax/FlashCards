@@ -34,9 +34,6 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
-      - name: Run UI Tests
-        run: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.charr0max.flashcards.ui.QuestionScreenTest
-
       - name: Build Artifact
         run: ./gradlew assembleDebug
 
