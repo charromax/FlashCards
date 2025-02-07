@@ -17,12 +17,11 @@
 ## 📁 Estructura del Proyecto
 
 📦 FlashCards
-
-┣ 📂 app
-┃ ┣ 📂 data  // Fuente de datos (API, Repositorios, etc.)
-┃ ┣ 📂 domain // Casos de uso y lógica de negocio
-┃ ┣ 📂 ui     // Presentación y pantallas
-┃ ┣ 📂 utils  // Helpers y clases de utilidad
+ ┣ 📂 app
+ ┃ ┣ 📂 data  // Fuente de datos (API, Repositorios, etc.)
+ ┃ ┣ 📂 domain // Casos de uso y lógica de negocio
+ ┃ ┣ 📂 ui     // Presentación y pantallas
+ ┃ ┣ 📂 utils  // Helpers y clases de utilidad
 
 ## 🚀 Instalación y Configuración
 
