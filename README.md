@@ -2,7 +2,7 @@
 
 ## FlashCards es una aplicación de entrevistas técnicas interactiva que utiliza Jetpack Compose, MVI con Clean Architecture, y Google Gemini para generar y corregir preguntas de entrevistas técnicas.
 
-📌 Características
+## 📌 Características
 
 **Selección de dificultad y temas:** El usuario puede elegir entre niveles de dificultad (Jr, Ssr, Senior) y temas (Jetpack Compose, Coroutines, Networking, Performance, Flows).
 
@@ -14,33 +14,33 @@
 
 **UI intuitiva:** Implementado en Jetpack Compose con Hilt para DI y Retrofit para llamadas a API.
 
-📁 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
-📦 FlashCards
+## 📦 FlashCards
 ┣ 📂 app
 ┃ ┣ 📂 data  // Fuente de datos (API, Repositorios, etc.)
 ┃ ┣ 📂 domain // Casos de uso y lógica de negocio
 ┃ ┣ 📂 ui     // Presentación y pantallas
 ┃ ┣ 📂 utils  // Helpers y clases de utilidad
 
-🚀 Instalación y Configuración
+## 🚀 Instalación y Configuración
 
-1️⃣ Clonar el Repositorio
+### 1️⃣ Clonar el Repositorio
 
 git clone https://github.com/tu-usuario/FlashCards.git
 cd FlashCards
 
-2️⃣ Agregar API Key de Google Gemini
+### 2️⃣ Agregar API Key de Google Gemini
 
 Crear un archivo secrets.properties en la raíz del proyecto y agregar:
 
 GEMINI_API_KEY=tu_api_key
 
-3️⃣ Ejecutar el Proyecto
+### 3️⃣ Ejecutar el Proyecto
 
 Desde Android Studio, selecciona un emulador/dispositivo y ejecuta 🚀.
 
-🛠️ Tecnologías Utilizadas
+### 🛠️ Tecnologías Utilizadas
 
 Jetpack Compose - UI declarativa
 
@@ -54,14 +54,14 @@ Google Gemini API - Generación y evaluación de preguntas
 
 SpeechRecognizer - Conversión de voz a texto
 
-📜 Licencia
+### 📜 Licencia
 
 Este proyecto está bajo la licencia MIT.
 
-👨‍💻 Autor
+### 👨‍💻 Autor
 
 charr0max
 
-⭐ ¡Contribuye!
+### ⭐ ¡Contribuye!
 
 Si quieres mejorar la app, siéntete libre de hacer un fork y enviar un PR. 🚀
