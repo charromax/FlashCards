@@ -17,6 +17,7 @@
 ## 📁 Estructura del Proyecto
 
 📦 FlashCards
+
 ┣ 📂 app
 ┃ ┣ 📂 data  // Fuente de datos (API, Repositorios, etc.)
 ┃ ┣ 📂 domain // Casos de uso y lógica de negocio
