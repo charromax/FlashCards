@@ -62,17 +62,6 @@ jobs:
           echo "VERSION_MINOR=$(grep versionMinor versions.properties | cut -d'=' -f2)" >> $GITHUB_ENV
           echo "VERSION_PATCH=$(grep versionPatch versions.properties | cut -d'=' -f2)" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-         tag_name: "v${{ env.versionMajor }}.${{ env.versionMinor }}.${{ env.versionPatch }}"
-         name: "Release v${{ env.versionMajor }}.${{ env.versionMinor }}.${{ env.versionPatch }}"
-         draft: false
-         prerelease: false
-         files: app/build/outputs/bundle/release/app-release.aab
-        env:
-           GITHUB_TOKEN: ${{ secrets.TOKEN }}
-
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > keystore.jks
 
@@ -88,12 +77,23 @@ jobs:
             -keystore keystore.jks \
             -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
             -keypass "${{ secrets.KEY_ALIAS_PASSWORD }}" \
-            -signedjar app-release.aab \
+            -signedjar app-release-signed.aab \
             app/build/outputs/bundle/release/app-release.aab \
             "${{ secrets.KEY_ALIAS }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${{ env.VERSION_PATCH }}"
+          name: "Release v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${{ env.VERSION_PATCH }}"
+          draft: false
+          prerelease: false
+          files: app-release-signed.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Upload Signed AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-signed
-          path: app/build/outputs/bundle/release/app-release.aab
+          path: app-release-signed.aab
