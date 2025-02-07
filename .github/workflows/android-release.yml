@@ -24,6 +24,9 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > keystore.jks
 
+      - name: Inject Gemini API Key
+        run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> secrets.properties
+
       - name: Build AAB
         run: ./gradlew bundleRelease
 
