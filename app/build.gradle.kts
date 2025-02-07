@@ -31,7 +31,6 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "OPENAI_API_KEY", "\"${secrets["OPENAI_API_KEY"]}\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"${secrets["GEMINI_API_KEY"]}\"")
             isMinifyEnabled = false
             proguardFiles(
@@ -39,7 +38,6 @@ android {
             )
         }
         debug {
-            buildConfigField("String", "OPENAI_API_KEY", "\"${secrets["OPENAI_API_KEY"]}\"")
             buildConfigField("String", "GEMINI_API_KEY", "\"${secrets["GEMINI_API_KEY"]}\"")
         }
     }
