@@ -56,6 +56,12 @@ jobs:
           git tag -fa "$newVersionTag" -m "🚀 Release $newVersionTag"
           git push origin "$newVersionTag"
 
+      - name: Export version variables
+        run: |
+          echo "VERSION_MAJOR=$(grep versionMajor versions.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+          echo "VERSION_MINOR=$(grep versionMinor versions.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+          echo "VERSION_PATCH=$(grep versionPatch versions.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
