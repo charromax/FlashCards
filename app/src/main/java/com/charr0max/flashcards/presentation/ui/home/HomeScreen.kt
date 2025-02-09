@@ -159,7 +159,7 @@ private fun HomeScreenContent(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Text("Selecciona el lenguaje", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -175,7 +175,7 @@ private fun HomeScreenContent(
                     )
                 }
             }
-
+            Spacer(modifier = Modifier.height(24.dp))
             Text("Selecciona los temas", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(

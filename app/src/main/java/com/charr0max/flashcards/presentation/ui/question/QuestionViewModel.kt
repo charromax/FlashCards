@@ -7,7 +7,9 @@ import com.charr0max.flashcards.domain.model.Result
 import com.charr0max.flashcards.domain.usecase.GetQuestionFromGeminiUseCase
 import com.charr0max.flashcards.domain.usecase.SendAnswerToGeminiUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -23,6 +25,9 @@ class QuestionViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(QuestionState())
     val state: StateFlow<QuestionState> get() = _state
+
+    private val _snackbarEvents = MutableSharedFlow<String>()
+    val snackbarEvents: SharedFlow<String> = _snackbarEvents
 
     init {
         speechRecognizerHelper.setOnResultListener { result ->
@@ -46,7 +51,10 @@ class QuestionViewModel @Inject constructor(
             language = state.value.language
         ).collectLatest { result ->
             when (result) {
-                is Result.Error -> _state.update { it.copy(isLoading = false) }
+                is Result.Error -> {
+                    _state.update { it.copy(isLoading = false) }
+                    _snackbarEvents.emit(result.message)
+                }
                 Result.Loading -> _state.update {
                     it.copy(
                         isLoading = true,
@@ -77,7 +85,10 @@ class QuestionViewModel @Inject constructor(
             answer = state.value.userAnswer
         ).collectLatest { result ->
             when (result) {
-                is Result.Error -> _state.update { it.copy(isLoading = false) }
+                is Result.Error -> {
+                    _state.update { it.copy(isLoading = false) }
+                    _snackbarEvents.emit(result.message)
+                }
                 Result.Loading -> _state.update { it.copy(isLoading = true) }
                 is Result.Success -> {
                     _state.update {
