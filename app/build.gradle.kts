@@ -48,15 +48,21 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "11"
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -69,7 +75,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.symbol.processing.api)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -103,5 +109,17 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     // Lifecycle para Jetpack Compose
     implementation(libs.androidx.lifecycle.runtime.compose)
+    // MockK for mocking dependencies
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.android) // If testing on Android
+
+    // Kotlin Coroutines Test for testing coroutines and Flows
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Turbine for testing Flows
+    testImplementation(libs.turbine)
+
+    // AndroidX Core Testing (for LiveData and ViewModel tests)
+    testImplementation(libs.androidx.core.testing)
 
 }
