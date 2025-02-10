@@ -1,6 +1,7 @@
 package com.charr0max.flashcards.presentation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.compose.composable
@@ -30,7 +31,7 @@ data object QuestionNavigation : NavigationRoute {
 }
 
 @Composable
-fun FlashCardsNavHost(activity: ComponentActivity) {
+fun FlashCardsNavHost(activity: ComponentActivity, innerPadding: PaddingValues) {
     val navController = rememberNavController()
 
     ComposeNavHost(

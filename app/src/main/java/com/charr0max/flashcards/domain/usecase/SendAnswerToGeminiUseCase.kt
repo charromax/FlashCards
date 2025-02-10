@@ -20,6 +20,6 @@ class SendAnswerToGeminiUseCase @Inject constructor(
                 "Evalúa la respuesta considerando el nivel del puesto y proporciona una retroalimentación clara en no más de 6 líneas. " +
                 "Indica si la respuesta es correcta, parcial o incorrecta y explica brevemente por qué.\n\n" +
                 "Si es relevante, proporciona un enlace a documentación oficial para mejorar la comprensión."
-        return repository.fetchQuestion(prompt)
+        return repository.evaluateAnswer(prompt)
     }
 }

@@ -45,6 +45,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,7 +100,7 @@ fun QuestionScreen(
         else -> Color.Gray
     }
 
-    var userAnswer by remember { mutableStateOf(TextFieldValue(state.userAnswer)) }
+    var userAnswer by rememberSaveable { mutableStateOf(state.userAnswer) }
     var geminiAnswer by remember { mutableStateOf(AnnotatedString("")) }
     val scrollState = rememberScrollState()
     val uriHandler = LocalUriHandler.current
@@ -222,9 +223,9 @@ fun QuestionScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     if (isUserTyping) {
                         OutlinedTextField(
-                            value = userAnswer.text,
+                            value = userAnswer,
                             onValueChange = {
-                                userAnswer = TextFieldValue(it)
+                                userAnswer = it
                                 isUserTyping =
                                     true  // 🔹 Usuario está escribiendo, deshabilitamos links
                             },
@@ -255,7 +256,7 @@ fun QuestionScreen(
                 ) {
                     Button(onClick = {
                         isUserTyping = true
-                        userAnswer = TextFieldValue("")
+                        userAnswer = ""
                         geminiAnswer = AnnotatedString("")
                         viewModel.loadQuestion()
                     }) {
@@ -291,7 +292,7 @@ fun QuestionScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         ActionButton(
                             onClick = viewModel::sendAnswerToGemini,
-                            enabled = isUserTyping && userAnswer.text.isNotEmpty()
+                            enabled = isUserTyping && userAnswer.isNotEmpty()
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
