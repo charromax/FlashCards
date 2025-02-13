@@ -14,6 +14,6 @@ class GetQuestionFromGeminiUseCase  @Inject constructor(
                 "en una entrevista técnica para este nivel de experiencia. " +
                 "Evita preguntas abiertas como 'describe una situación en la que tuviste que...' y en su lugar genera preguntas " +
                 "con respuestas más concisas y técnicas, que puedan evaluarse de manera objetiva."
-        return repository.fetchQuestion(prompt)
+        return repository.talkToGemini(prompt)
     }
 }

@@ -49,7 +49,7 @@ class QuestionViewModel @Inject constructor(
             topic = currentTopic,
             difficulty = state.value.difficulty,
             language = state.value.language
-        ).collectLatest { result ->
+        ).collect { result ->
             when (result) {
                 is Result.Error -> {
                     _state.update { it.copy(isLoading = false) }
@@ -83,7 +83,7 @@ class QuestionViewModel @Inject constructor(
             difficulty = state.value.difficulty,
             question = state.value.question,
             answer = state.value.userAnswer
-        ).collectLatest { result ->
+        ).collect { result ->
             when (result) {
                 is Result.Error -> {
                     _state.update { it.copy(isLoading = false) }
